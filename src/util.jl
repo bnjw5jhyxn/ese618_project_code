@@ -1,9 +1,18 @@
 module Util
 
-using LinearAlgebra: eigvals, svd, Diagonal
+using LinearAlgebra: norm, eigvals, svd, svdvals, tr, Diagonal, I
 
 function spectral_radius(A::Matrix{Float64})::Float64
     maximum(abs, eigvals(A))
+end
+
+function schatten_norm(A::Matrix{Float64}; p::Float64 = 1.0)::Float64
+    norm(svdvals(A), p)
+end
+
+function frob_inpr(X::Matrix{Float64}, Y::Matrix{Float64})::Float64
+    @assert size(X) == size(Y)
+    tr(transpose(X) * Y)
 end
 
 """
@@ -35,6 +44,28 @@ function make_hankel(;
     )::Matrix{Float64}
     vcat([G[:, i*p+1 : (i+T2+1)*p] for i = 1:T1]...)
 end
+
+function make_unclipped_hankel(;
+        X::Matrix{Float64},
+        n::Int64, j::Int64, k::Int64,
+    )::Matrix{Float64}
+    njpk = size(X, 2)
+    @assert njpk == n * (j + k - 1)
+    vcat([X[:, i*n+1 : (i+k)*n] for i = 0:j-1]...)
+end
+
+function hankel_adj(;
+        W::Matrix{Float64},
+        m::Int64, n::Int64,
+    )::Matrix{Float64}
+    (mj, nk) = size(W)
+    j = mj ÷ m
+    k = nk ÷ n
+    hcat([sum([W[m*s + 1 : m*(s+1), n * (t-s) + 1 : n * (t-s+1)]
+               for s = max(0, t+1-k) : min(t, j-1)])
+          for t = 0 : j+k-2]...)
+end
+
 
 function synthetic_system(;
         n::Int64, p::Int64, m::Int64, ρ::Float64,
