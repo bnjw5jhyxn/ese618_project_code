@@ -1,0 +1,66 @@
+\begin{frame}
+\frametitle{Agenda}
+\begin{itemize}
+\item Problem setup
+\item Least squares
+\item Low-rank matrix recovery
+\item Conclusion
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Problem setup}
+\begin{align*}
+x_{t+1} &= A x_t + B u_t + w_t \\
+y_t &= C x_t + D u_t + z_t \\
+w_t &\sim \mathcal N (0, \sigma_w I_n) \\
+z_t &\sim \mathcal N (0, \sigma_z I_m)
+\end{align*}
+
+want to find $\hat A$, $\hat B$, $\hat C$, $\hat D$
+\end{frame}
+
+\begin{frame}
+\frametitle{Collecting data}
+run a single-trajectory experiment, taking
+\[u_t \sim \mathcal N (0, \sigma_u I_p)\]
+\end{frame}
+
+\begin{frame}
+\frametitle{Learning Markov parameters}
+\begin{align*}
+y_t
+&= C x_t + D u_t + z_t \\
+&= C (A x_{t-1} + B u_{t-1} + w_{t-1}) + D u_t + z_t \\
+&= C A^{T-1} x_{t-T+1} + \sum _{i=1} ^{T-1} C A^{i-1} B u_{t-i}
+  + \sum _{i=1} ^{T-1} C A^{i-1} w_{t-i} + D u_t + z_t \\
+&= G \overline{u}_t + F \overline{w}_t + z_t + C A^{T-1} x_{t-T+1} \\
+\end{align*}
+where
+\begin{align*}
+G &= \begin{bmatrix} D & G_0 & G_1 & \cdots & G_{T-2} \end{bmatrix}
+= \begin{bmatrix} D & C B & C A B & \cdots & C A^{T-2} B \end{bmatrix} \\
+F &= \begin{bmatrix} 0 & C & C A & \cdots & C A^{T-2} \end{bmatrix} \\
+\end{align*}
+taken from
+``Non-asymptotic identification of LTI systems from a single trajectory''
+by Oymak and Ozay, 2019
+\end{frame}
+
+\begin{frame}
+\frametitle{Using the Markov parameters to learn
+  $\hat A$, $\hat B$, $\hat C$, and $\hat D$}
+the Ho-Kalman algorithm takes a matrix $\hat G$
+and produces estimates $\hat A$, $\hat B$, $\hat C$, and $\hat D$
+
+Oymak and Ozay show that
+if $\Verts{\hat G - G}_{\text{op}}$ is small,
+then there is a unitary matrix $T$ such that
+$\Verts{T^\ast \hat A T - A}_F$,
+$\Verts{T^\ast \hat B - B}_F$,
+$\Verts{\hat C T - C}_F$,
+and $\Verts{\hat D - D}_{\text{op}}$
+are all small
+
+we therefore focus on producing a good estimate $\hat G$
+\end{frame}

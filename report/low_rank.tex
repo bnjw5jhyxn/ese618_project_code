@@ -1,0 +1,30 @@
+\section{Evaluation of low-rank matrix recovery}
+
+I implemented primal and dual ADMM from \cite{fazel2013hankel}
+and used them to compute
+\[ \hat G = \arg\min_G \frac{1}{2} \Verts{G \overline{U} - Y}_F^2 + \mu \Verts{\mathcal{H}(G)}_\star. \]
+Here, we use the Schatten $1$-norm of $\mathcal{H}(G)$
+as a heuristic to minimize the rank of $\mathcal{H}(G)$.
+I believed that this would give better results
+than ordinary least squares because the Ho-Kalman algorithm
+involves taking the SVD of $\mathcal{H}(\hat G)$ and
+zeroing out all but the top $n$ singular values.
+If we can optimize over $G$ while constraining the rank
+of $\mathcal{H}(G)$ to be small,
+we should be able to ensure that the top $n$ singular vectors
+give a better fit to the data.
+
+\begin{figure}
+\includegraphics[scale=0.7]{unfiltered_rho_small}
+\includegraphics[scale=0.7]{unfiltered_rho_1me}
+\end{figure}
+I didn't get this idea to work, as we can see in the plots.
+When $\mu$ is small, we get exactly the same error as with ordinary least squares,
+and when $\mu$ is large, we get worse error.
+
+\begin{figure}
+\includegraphics[scale=0.7]{prefiltered_rho_1me}
+\end{figure}
+The same thing happens when I replace the second step
+of prefiltered least squares with
+\[ \hat G = \arg\min_G \frac{1}{2} \Verts{G \overline{U} - (Y - \phi K)}_F^2 + \mu \Verts{\mathcal{H}(G)}_\star. \]

@@ -1,0 +1,24 @@
+\begin{frame}
+\frametitle{Agenda}
+\begin{itemize}
+\item Problem setup
+\item Least squares
+\item Low-rank matrix recovery
+\item \textbf{Conclusion}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusion}
+minimizing the rank of $\hank(\hat G)$
+didn't produce better estimates $\hat G$
+
+Fazel et al show that Hankel matrix rank minimization
+can be used to eliminate observation noise:
+the solution to
+\[ \arg\min _{\hat Y} \frac{1}{2} \Verts{\hat Y - Y}_F^2 + \mu \Verts{\hank(Y) U^\bot}_\star \]
+gives a good estimate of $y_t - z_t = C x_t + D u_t$
+
+maybe applying Hankel matrix rank minimization elsewhere
+will give better estimates of system parameters than least squares
+\end{frame}

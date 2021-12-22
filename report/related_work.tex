@@ -1,0 +1,57 @@
+\section{Related Works}
+
+\cite{oymak2019singletraj} show
+that for suitably chosen $K$, a good estimate of the Markov parameters
+\begin{align*}
+G &= \begin{bmatrix} D & G_0 & G_1 & \cdots & G_{K-2} \end{bmatrix} \\
+&= \begin{bmatrix} D & CB & CAB & \cdots & C A^{K-2} B \end{bmatrix}
+\end{align*}
+can be used to obtain good estimates of the system parameters
+up to a similarity transform.
+We can therefore focus on estimating the Markov parameters,
+and it will follow from this result
+that we can then obtain a good system realization.
+
+\cite{oymak2019singletraj} also give
+an algorithm that estimates the Markov parameters in the single-trajectory setting,
+and they show that the estimated Markov parameters
+converge to the true Markov parameters when $\rho(A) < 1$.
+\cite{simchowitz2019parametric} modify
+the algorithm by \cite{oymak2019singletraj},
+and they show that the estimated Markov parameters produced by the modified algorithm
+converge to the true Markov parameters when $\rho(A) \le 1$,
+even in the presence of adversarial noise.
+
+\cite{recht2010lowrank} show that,
+in the episodic setting and in the absence of noise,
+if the control inputs $u_t^n \sim \mathcal N (0, \sigma_u I_m)$
+are independent,
+then the solution to
+\begin{align*}
+  \minimize &\Verts{\mathcal H (\hat G)}_\star \\
+  \subject & \hat G \bar u^n = y^n_T \text{ for all $n$}
+\end{align*}
+minimizes the rank of $\mathcal H(\hat G)$ and therefore
+produces a minimal realization of the system,
+where
+$\mathcal H(G)$ is called the Hankel matrix of $G$,
+\[
+  \mathcal H(G) = \begin{bmatrix}
+    D & G_0 & \cdots & G_{T_2-1} \\
+    G_0 & G_1 & \cdots & G_{T_2} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    G_{T_1-1} & G_{T_1} & \cdots & G_{T_1 + T_2 - 1}
+  \end{bmatrix},
+  \qquad
+  \bar u ^n = \begin{bmatrix} u^n_{T-1} \\ u^n_{T-1} \\ \vdots \\ u^n_0 \end{bmatrix},
+\]
+and $T = T_1 + T_2 + 1$ is the length of each episode.
+
+\cite{fazel2013hankel} give algorithms for Schatten 1-norm minimization
+on structured matrices, such as Hankel matrices,
+and they allow for noise in the
+constraints of the rank minimization problem.
+They also provide Matlab implementations of their algorithms
+and provide experimental results in the single-trajectory setting
+with measurement noise (i.e.\ $\sigma_z \ne 0$)
+and no process noise (i.e.\ $\sigma_w = 0$).

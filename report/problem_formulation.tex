@@ -1,0 +1,21 @@
+\section{Problem Formulation}
+
+We focus on the system identification problem
+described by \cite{oymak2019singletraj}.
+Consider a linear system with
+state space $\Real^n$ where $n$ is unknown,
+input space $\Real^p$,
+and observation space $\Real^m$,
+and dynamics
+\begin{align*}
+x_{t+1} &= A x_t + B u_t + w_t \\
+y_t &= C x_t + D u_t + z_t \\
+w_t &\sim \mathcal N (0, \sigma_w I_n) \\
+z_t &\sim \mathcal N (0, \sigma_z I_m)
+\end{align*}
+where the system parameters $A$, $B$, $C$, and $D$
+are matrices with the appropriate dimensions
+and the $w_t$ and $z_t$ are independent.
+Suppose we want to learn the system parameters
+(up to a similarity transform)
+by running a single-trajectory experiment.

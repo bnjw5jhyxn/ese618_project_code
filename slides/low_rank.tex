@@ -1,0 +1,82 @@
+\begin{frame}
+\frametitle{Agenda}
+\begin{itemize}
+\item Problem setup
+\item Least squares
+\item \textbf{Low-rank matrix recovery}
+\item Conclusion
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Motivation}
+Ho-Kalman involves forming the Hankel matrix $\hank(\hat G)$, where
+\[
+  \hank(G) = \begin{bmatrix}
+    D & G_0 & \cdots & G_{T_2-1} \\
+    G_0 & G_1 & \cdots & G_{T_2} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    G_{T_1-1} & G_{T_1} & \cdots & G_{T_1 + T_2 - 1}
+  \end{bmatrix}
+\]
+taking its SVD, and zeroing out all but the top $n$ singular values
+in order to produce a system realization with order $n$
+(i.e. $\hat A$ is $n \times n$)
+
+when producing our estimate $\hat G$,
+we might want to constrain it to have rank at most $n$ like this:
+\[
+\hat G = \arg\min_G \Verts{G \overline{U} - Y}_F^2 \quad
+\text{such that} \quad \rank\parens{\hank(G)} \le n
+\]
+\end{frame}
+
+\begin{frame}
+\frametitle{Schatten 1-norm minimization}
+\[
+\hat G = \arg\min_G \Verts{G \overline{U} - Y}_F^2 \quad
+\text{such that} \quad \rank\parens{\hank(G)} \le n
+\]
+
+\[
+\frac{1}{2} \begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix}
++ \frac{1}{2} \begin{bmatrix} 0 & 0 \\ 0 & 1 \end{bmatrix}
+= \begin{bmatrix} 1/2 & 0 \\ 0 & 1/2 \end{bmatrix}
+\]
+the rank function is not convex, so we use the Schatten 1-norm as a heuristic:
+\[
+\hat G = \arg\min_G \frac{1}{2} \Verts{G \overline{U} - Y}_F^2 + \mu \Verts{\hank(G)}_\star
+\]
+
+I implemented algorithms for this problem presented in
+``Hankel matrix rank minimization
+with applications to system identification and realization''
+by Fazel, Pong, Sun, and Tseng, 2013
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\includegraphics[scale=0.6]{unfiltered_rho_small}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\includegraphics[scale=0.6]{unfiltered_rho_1me}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Schatten 1-norm minimization with prefiltering}
+I tried doing the same thing with prefiltered least squares:
+\begin{align*}
+\phi &= \arg\min_\varphi \Verts{\varphi K - Y}_F^2 + \mu_{\text{PF}} \Verts{\varphi}_F^2 \\
+\hat G &= \arg\min_G \frac{1}{2} \Verts{G \overline{U} - (Y - \phi K)}_F^2 + \mu \Verts{\hank(G)}_\star
+\end{align*}
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\includegraphics[scale=0.6]{prefiltered_rho_1me}
+\end{figure}
+\end{frame}
