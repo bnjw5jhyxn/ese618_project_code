@@ -1,7 +1,7 @@
 module Rank
 
 using LinearAlgebra: svd, opnorm, norm, Diagonal
-#using Printf: @printf
+using Printf: @printf
 using ..Util: schatten_norm, frob_inpr, make_unclipped_hankel, hankel_adj
 
 #=
@@ -20,14 +20,17 @@ function primal_admm(;
         𝚼::Matrix{Float64},
         m::Int64, n::Int64, j::Int64, k::Int64,
         μ::Float64,
-        β::Float64 = 1.0,
+        y_init::Union{Matrix{Float64}, Nothing} = nothing,
+        Λ_init::Union{Matrix{Float64}, Nothing} = nothing,
+        #β::Float64 = 1.0,
         #β::Float64 = 0.5 * μ * min(j,k) / opnorm(b),
+        β::Float64 = 0.5 * μ * min(j,k),
         τ::Float64 = 1.61,
         maxIter::Int64 = 10000,
         gap_check_freq::Int64 = 10,
         tolerance::Float64 = 1e-4,
         ε::Float64 = 1e-8,
-    )::Matrix{Float64}
+    )::Tuple{Matrix{Float64}, Matrix{Float64}, Float64, Float64}
     r = min(j, k)
     σ = β / (β * r + opnormA^2)
     (p1, p2) = size(b)
@@ -57,8 +60,8 @@ function primal_admm(;
     end
 
     Y = zeros(m * j, q)
-    y = zeros(m, n * (j + k - 1))
-    Λdβ = zeros(m * j, q)
+    y = y_init == nothing ? zeros(m, n * (j + k - 1)) : y_init
+    Λdβ = Λ_init == nothing ? zeros(m * j, q) : Λ_init / β
     Y_prev = ones(m * j, q)
     y_change = ones(m, n * (j + k - 1))
     Λdβ_change = ones(m * j, q)
@@ -66,6 +69,7 @@ function primal_admm(;
     min_fval = 1e20
     min_dval = 1e20
     y_best = zeros(m, n * (j + k - 1))
+    Λ_best = zeros(m * j, q)
     duality_gap = 1.0
     while (numIter < maxIter && duality_gap ≥ tolerance
            && (norm(y_change) ≥ ε || norm(Λdβ_change) ≥ ε
@@ -94,14 +98,17 @@ function primal_admm(;
                 min_fval = fvalh
                 y_best = yh
             end
-            min_dval = min(min_dval, dval)
+            if dval < min_dval
+                min_dval = dval
+                Λ_best = PΛ
+            end
             duality_gap = (min_fval + min_dval) / max(1, abs(min_dval))
             #@printf "fval = %f, dval = %f\n" fval dval
         end
     end
 
-    #@printf "μ = %f, duality_gap = %f, numIter = %d\n" μ duality_gap numIter
-    y_best
+    @printf "μ = %f, duality_gap = %f, numIter = %d\n" μ duality_gap numIter
+    (y_best, Λ_best, min_fval, -min_dval)
 end
 
 function dual_admm(;
@@ -113,6 +120,8 @@ function dual_admm(;
         𝚼::Matrix{Float64},
         m::Int64, n::Int64, j::Int64, k::Int64,
         μ::Float64,
+        y_init::Union{Matrix{Float64}, Nothing} = nothing,
+        Λ_init::Union{Matrix{Float64}, Nothing} = nothing,
         #β::Float64 = 1.0,
         β::Float64 = opnorm(b) / (16 * μ * min(j,k)),
         τ::Float64 = 1.61,
@@ -120,7 +129,7 @@ function dual_admm(;
         gap_check_freq::Int64 = 10,
         tolerance::Float64 = 1e-4,
         ε::Float64 = 1e-8,
-    )::Matrix{Float64}
+    )::Tuple{Matrix{Float64}, Matrix{Float64}, Float64, Float64}
     r = min(j, k)
     σ1 = 1 / opnormA^2
     σ2 = 1 / r
@@ -155,8 +164,8 @@ function dual_admm(;
     τβ = τ * β
 
     𝛄 = zeros(p1, p2)
-    Λ = zeros(m * j, q)
-    y = zeros(m, n * (j + k - 1))
+    Λ = Λ_init == nothing ? zeros(m * j, q) : Λ_init
+    y = y_init == nothing ? zeros(m, n * (j + k - 1)) : y_init
     𝛄_prev = ones(p1, p2)
     Λ_prev = ones(m * j, q)
     y_change = ones(m, n * (j + k - 1))
@@ -165,6 +174,7 @@ function dual_admm(;
     min_fval = 1e20
     min_dval = 1e20
     y_best = zeros(m, n * (j + k - 1))
+    Λ_best = zeros(m * j, q)
     duality_gap = 1.0
     while (numIter < maxIter && duality_gap ≥ tolerance
            && (norm(𝛄 - 𝛄_prev) ≥ ε
@@ -191,14 +201,17 @@ function dual_admm(;
                 min_fval = fvalh
                 y_best = yh
             end
-            min_dval = min(min_dval, dval)
+            if dval < min_dval
+                min_dval = dval
+                Λ_best = Λ
+            end
             duality_gap = (min_fval + min_dval) / max(1, abs(min_dval))
             #@printf "fval = %f, dval = %f\n" fval dval
         end
     end
 
-    #@printf "μ = %f, duality_gap = %f, numIter = %d\n" μ duality_gap numIter
-    y_best
+    @printf "μ = %f, duality_gap = %f, numIter = %d\n" μ duality_gap numIter
+    (y_best, Λ_best, min_fval, -min_dval)
 end
 
 end

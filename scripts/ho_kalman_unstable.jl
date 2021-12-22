@@ -26,11 +26,10 @@ end
 errs = [mean([rand_sys_err(ρ) for _ = 1:num_trials]) for ρ = ρs]
 gr()
 p = plot(
-         ρs, errs,
+         ρs, log10.(errs),
          xlabel=L"\rho(A)",
-         ylabel=L"\Vert \hat G - G \Vert _{\rm op}",
-         yscale=:log10,
+         ylabel=L"\log_{10} \Vert \hat G - G \Vert _{\rm op}",
          label="",
          title="error of Ho-Kalman algorithm for unstable systems",
         )
-savefig(p, "plots/ho_kalman_unstable.svg")
+savefig(p, "plots/ho_kalman_unstable.pdf")

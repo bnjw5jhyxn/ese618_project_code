@@ -12,7 +12,7 @@ end
 
 function frob_inpr(X::Matrix{Float64}, Y::Matrix{Float64})::Float64
     @assert size(X) == size(Y)
-    tr(transpose(X) * Y)
+    sum(X .* Y)
 end
 
 """
